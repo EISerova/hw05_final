@@ -32,16 +32,15 @@ class PostCreateForm(TestCase):
             follow=True
         )
 
-        number_of_created_users: int = 1
+        number_of_users: int = 1
         users_count: int = User.objects.count()
         user_id: int = 1
         new_user: QuerySet[User] = User.objects.get(id=user_id)
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(users_count, number_of_created_users)
+        self.assertEqual(users_count, number_of_users)
         self.assertEqual(new_user.id, user_id)
         self.assertEqual(new_user.first_name, form_data['first_name'])
         self.assertEqual(new_user.last_name, form_data['last_name'])
         self.assertEqual(new_user.username, form_data['username'])
         self.assertEqual(new_user.email, form_data['email'])
-
