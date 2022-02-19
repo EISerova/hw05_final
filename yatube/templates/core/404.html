@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}
+Неверный адрес страницы
+{% endblock title %}
+
+{% block content %}
+<div align="center">
+  <div align="center" class="card" style="width: 40rem;">
+    <div class="card-body">
+      <h5 class="card-title">
+        Неверный адрес страницы!
+      </h5>
+      <p class="card-text">
+        Увы, введенный Вами адрес {{ path }} не существует на сайте.
+      </p>
+      <a href="{% url 'posts_page:index' %}" class="card-link">
+        Вернуться на главную страницу
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock content %}
+
+

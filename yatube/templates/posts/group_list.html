@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Записи сообщества {{ group.title }}
+{% endblock title %}
+
+{% block content %}
+
+<div class="post-style">
+  {% block header %}
+    <h1>
+      {{ group.title }} 
+    </h1>
+  {% endblock %}
+  <p>
+    {{ group.description }}
+  </p>
+</div>
+  {% for post in page_obj %}
+  <!-- Подключаем из бустрап контейнер контента Карточки -->
+    <div class="card-style">
+      <div class="card">
+        <div class="card-body">
+          <!-- Подключаем шаблон поста -->
+          {% include 'posts/post.html' %}
+        </div> <!-- card body -->
+      </div> <!-- card -->
+    </div> <!-- card-style -->
+    {% if not forloop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %}
+  {% include 'posts/includes/paginator.html' %}
+{% endblock content%}

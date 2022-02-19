@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+  Об авторе
+{% endblock title %}
+   
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8 p-5">
+      <div class="card">
+        <p align="center">
+          Привет, меня зовут Катя. В настоящий момент я работаю гос.служащим. Мне 38 лет и этой мой первый сайт. Мой аккаунт на Github: https://github.com/EISerova/ .
+          Резюме пока нет, но оно скоро будет :)
+          В мир программирования я пришла по рассылке "Цифровые профессии".          
+        </p>
+        <p align="center">
+          Фото моего рабочего места. Вот туточки я и написал этот сайт:
+        </p>
+        <p class="aligncenter">
+          <img src="{% static 'img/WorkPlace.jpg' %}" alt="" />
+        </p>
+        <p align="center">
+          А это мой помощник Луна. В программировании она ничего не соображает, но морально поддерживает:
+        </p>
+        <p class="aligncenter">
+          <img src="{% static 'img/Cat.jpg' %}" alt="" />
+        </p>
+        <p align="center">
+          Два года назад я сделала ремонт в квартире своими руками(почти), дневник ремонта вела в Яндекс-Дзене: https://zen.yandex.ru/remont_story 
+          (раз нет резюме, пусть будет хоть такая ссылка).
+        </p>
+      </div> <!-- card -->
+    </div> <!-- col -->
+  </div> <!-- row -->
+{% endblock content%}

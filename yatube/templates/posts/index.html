@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load cache %}
+
+{% block title %}
+  Последние обновления на сайте
+{% endblock title %}
+
+{% block content %}    
+  <h1 class="post-style">
+    Последние обновления на сайте
+  </h1>
+  {% include 'posts/includes/switcher.html' %}
+  <!-- Кэширование списка постов каждые 20 секунд -->
+  {% cache 20 index_page %}
+  {% for post in page_obj %}  
+    <!-- Подключаем из бустрап контейнер контента Карточки -->
+    <div class="card-style">
+      <div class="card">
+        <div class="card-body">
+          <!-- Подключаем шаблон поста -->
+          {% include 'posts/post.html' %}
+          <!-- Кнопка перехода к записям группы -->
+          {% if post.group %}
+            <a href="{% url 'posts_page:group_list' post.group.slug %}" 
+              class="btn btn-nfo my-btn btn-sm">все записи группы
+            </a>
+          {% else %}
+            Нет сообщества
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% if not forloop.last %}
+      <hr>
+    {% endif %}
+  {% endfor %}
+  {% endcache %} 
+  {% include 'posts/includes/paginator.html' %}
+{% endblock content%}

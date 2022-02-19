@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}
+  Технологии
+{% endblock %}
+
+{% block content %}
+  <div class="row">
+    <h1>
+      Вот что я умею
+    </h1>  
+    <aside class="col-12 col-md-3">
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Python
+        </li>
+        <li class="list-group-item">
+          Django
+        </li>
+        <li class="list-group-item">
+          Visual Studio Code
+        </li>
+        <li class="list-group-item">
+          Bash
+        </li>
+        <li class="list-group-item">
+          Git
+        </li>
+        <li class="list-group-item">
+          Debug toolbar
+        </li>
+      </ul>
+    </aside>
+    <article class="card-style">
+      <p>Этот мой первый сайт! 
+        Я его написала на языке Python с использованием фреймворка Django и ide Visual Studio Code. 
+        С самой программой я пока не разобралась на профессиональном уровне. 
+        По большей части использую её как блокнот. Но знаю, что в ней очень много полезных функций. Хочу потренироваться в дебаге, а пока в дебаге помогает установленный django debug toolbar.
+        Для запуска сервера использую терминал Bash. Проект хранится в моем аккаунте на Git.
+      </p>
+        <img 
+              src="{% static 'img/GitEISerova.jpg' %}" 
+              width="800" 
+              height="421" 
+              class="d-inline-block align-top" 
+              alt="">
+    </article>
+  </div>
+{% endblock %} 
