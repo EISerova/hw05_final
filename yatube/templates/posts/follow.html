@@ -10,7 +10,7 @@
     Лента подписки
   </h1>
   <!-- Подключаем виджет переключения лент -->
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with follow=True %}
   {% for post in page_obj %}  
     <!-- Подключаем из бустрап контейнер контента Карточки -->
     <div class="card-style">

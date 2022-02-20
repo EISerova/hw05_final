@@ -151,6 +151,8 @@ CACHES = {
     }
 }
 
+SHOWING_POSTS: int = 10
+
 # if DEBUG:
 #
 #    MIDDLEWARE += (

@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import UniqueConstraint
 from django.utils.text import slugify
 
 from core.models import CreatedModel
@@ -65,7 +66,7 @@ class Post(CreatedModel):
         return self.text[:15]
 
 
-class Comment (CreatedModel):
+class Comment(CreatedModel):
     """Модель сообщений."""
     author = models.ForeignKey(
         User,
@@ -103,3 +104,8 @@ class Follow(models.Model):
         related_name="following",
         verbose_name="Автор"
     )
+
+    class Meta:
+        UniqueConstraint(
+            fields=['user', 'author'], name='follower_author_connection'
+        )

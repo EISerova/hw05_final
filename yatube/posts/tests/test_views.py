@@ -427,7 +427,6 @@ class FollowViewTest(TestCase):
 
     def setUp(self) -> None:
         cache.clear()
-        self.guest_client = Client()
         self.author_client = Client()
         self.author_client.force_login(self.user)
         self.follower_client = Client()
@@ -439,11 +438,13 @@ class FollowViewTest(TestCase):
         """Авторизованный пользователь может подписываться
         на других пользователей """
         Post.objects.create(text='тест подписки', author=self.user)
-        self.follower_client.post(
+
+        self.follower_client.get(
             reverse(self.url_follow['name'], args=self.url_follow['arg'])
         )
+
         following_exist = Follow.objects.filter(
-            user=self.following_user
+            user=self.following_user, author=self.user
         ).exists()
 
         self.assertTrue(following_exist)
@@ -452,11 +453,11 @@ class FollowViewTest(TestCase):
         """Авторизованный пользователь может удалять
         подписки на других авторов"""
         Follow.objects.create(user=self.following_user, author=self.user)
-        self.follower_client.post(
+        self.follower_client.get(
             reverse(self.url_unfollow['name'], args=self.url_unfollow['arg'])
         )
         following_exist = Follow.objects.filter(
-            user=self.following_user
+            user=self.following_user, author=self.user
         ).exists()
 
         self.assertFalse(following_exist)

@@ -10,7 +10,7 @@
   <h1 class="post-style">
     Последние обновления на сайте
   </h1>
-  {% include 'posts/includes/switcher.html' %}
+  {% include 'posts/includes/switcher.html' with index=True %}
   <!-- Кэширование списка постов каждые 20 секунд -->
   {% cache 20 index_page %}
   {% for post in page_obj %}  

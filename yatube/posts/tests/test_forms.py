@@ -38,21 +38,24 @@ class PostFormEditTest(TestCase):
 
     def setUp(self):
         self.guest_client = Client()
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user_author)
+        self.author_client = Client()
+        self.author_client.force_login(self.user_author)
+        self.not_author_client = Client()
+        self.not_author_client.force_login(self.user_author)
 
     def test_valid_form_only_author_edit_post(self):
         """Только автор может изменять пост"""
         base_text: str = self.post.text
         base_group: str = self.post.group
-        new_post_text: str = 'Не автор редактирует пост'
+        base_pk: int = self.post.pk
+        new_text: str = 'Не автор редактирует пост'
         form_data = {
-            'text': new_post_text,
+            'text': new_text,
             'group': self.other_group.pk
         }
 
-        self.authorized_client.force_login(self.user_not_author)
-        response = self.authorized_client.post(
+        self.not_author_client.force_login(self.user_not_author)
+        response = self.not_author_client.post(
             reverse(
                 'posts_page:post_edit', kwargs={
                     'post_id': self.post.pk
@@ -61,15 +64,13 @@ class PostFormEditTest(TestCase):
             data=form_data,
             follow=True
         )
-        changed_post: QuerySet[Post] = Post.objects.get(
-            pk=self.post.pk
-        )
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(changed_post.group, base_group)
-        self.assertEqual(changed_post.text, base_text)
+        self.assertEqual(self.post.pk, base_pk)
+        self.assertEqual(self.post.group, base_group)
+        self.assertEqual(self.post.text, base_text)
         self.assertEqual(
-            changed_post.author,
+            self.post.author,
             self.user_author,
             msg='Пост отредактировал не автор'
         )
@@ -81,7 +82,7 @@ class PostFormEditTest(TestCase):
             'group': self.other_group.pk,
         }
 
-        response = self.authorized_client.post(
+        response = self.author_client.post(
             reverse(
                 'posts_page:post_edit', kwargs={
                     'post_id': self.post.pk

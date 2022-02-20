@@ -94,4 +94,4 @@ class PostURLTest(TestCase):
         self.authorized_client.force_login(self.user_not_author)
         response = self.authorized_client.get(self.url_post_for_edit)
 
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
+        self.assertRedirects(response, f'/posts/{self.post.pk}/')

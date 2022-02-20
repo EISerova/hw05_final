@@ -1,164 +1,195 @@
+from http.client import HTTPResponse
+from xml.etree.ElementTree import Comment
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.paginator import Page, Paginator
-from django.db.models.query import QuerySet
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.views.generic import View, CreateView, DetailView, ListView, UpdateView
 
 from .forms import CommentForm, PostForm
-from .models import Follow, Group, Post, User
-
-SHOWING_POSTS: int = 10
-
-
-def index(request):
-    page_obj = paginator_page(
-        Post.objects.select_related('author', 'group'),
-        request.GET.get('page'), SHOWING_POSTS
-    )
-    template = 'posts/index.html'
-    return render(request, template, {'page_obj': page_obj})
+from .models import Follow, Group, Post, User, Comment
+from .utils import paginator_page
 
 
-def group_posts(request, slug):
-    group = get_object_or_404(Group, slug=slug)
-    page_obj = paginator_page(
-        group.posts.select_related('author'),
-        request.GET.get('page'), SHOWING_POSTS
-    )
-    context = {
-        'group': group,
-        'page_obj': page_obj,
-    }
-    template = 'posts/group_list.html'
-    return render(request, template, context)
+class IndexListView(ListView):
+    template_name = 'posts/index.html'
+    post_list = Post.objects.select_related('author', 'group')
+    context_object_name = 'page_obj'
+
+    def get(self, request, *args, **kwargs):
+        self.page = self.request.GET.get('page')
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        paginator = Paginator(self.post_list, settings.SHOWING_POSTS)
+        return paginator.get_page(self.page)
 
 
-def profile(request, username):
-    author = get_object_or_404(User, username=username)
-    page_obj = paginator_page(
-        author.posts.select_related('group'),
-        request.GET.get('page'), SHOWING_POSTS
-    )
-    following = request.user.is_authenticated and author.following.filter(
-        user=request.user
-    ).exists()
-    context = {
-        'author': author,
-        'page_obj': page_obj,
-        'following': following,
-    }
-    template = 'posts/profile.html'
-    return render(request, template, context)
+class GroupListView(ListView):
+    template_name = 'posts/group_list.html'
+    context_object_name = 'page_obj'
+
+    def get(self, request, *args, **kwargs):
+        self.page = self.request.GET.get('page')
+        slug = kwargs['slug']
+        self.group = get_object_or_404(Group, slug=slug)
+        self.group_list = self.group.posts.select_related('author')
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        paginator = Paginator(self.group_list, settings.SHOWING_POSTS)
+        return paginator.get_page(self.page)
+
+    def get_context_data(self, **kwargs):
+        context = super(GroupListView, self).get_context_data(**kwargs)
+        context['group'] = self.group
+        return context
 
 
-def post_detail(request, post_id):
-    target_post = get_object_or_404(Post, pk=post_id)
-    form = CommentForm()
-    comments = target_post.comments.all()
+class ProfileListView(ListView):
+    template_name = 'posts/profile.html'
+    context_object_name = 'page_obj'
 
-    template = 'posts/post_detail.html'
+    def get(self, request, *args, **kwargs):
+        self.page = self.request.GET.get('page')
+        username = kwargs['username']
+        self.author = get_object_or_404(User, username=username)
+        self.profile_list = self.author.posts.select_related('group')
+        self.following = (
+            request.user.is_authenticated
+            and self.author.following.filter(user=request.user).exists()
+        )
+        return super().get(request, *args, **kwargs)
 
-    context = {
-        'target_post': target_post,
-        'form': form,
-        'comments': comments,
-    }
-    return render(request, template, context)
+    def get_queryset(self):
+        paginator = Paginator(self.profile_list, settings.SHOWING_POSTS)
+        return paginator.get_page(self.page)
 
-
-@login_required
-def post_create(request):
-    template = 'posts/create_post.html'
-
-    if request.method != 'POST':
-        form = PostForm()
-        return render(request, template, {'form': form})
-
-    form = PostForm(request.POST, files=request.FILES or None)
-    if not form.is_valid():
-        return render(request, template, {'form': form})
-    form.instance.author = request.user
-    form.save()
-    return redirect(
-        'posts_page:profile', form.instance.author.username
-    )
+    def get_context_data(self, **kwargs):
+        context = super(ProfileListView, self).get_context_data(**kwargs)
+        context['author'] = self.author
+        context['following'] = self.following
+        return context
 
 
-@login_required
-def post_edit(request, post_id):
-    template = 'posts/create_post.html'
-    target_post = get_object_or_404(Post, id=post_id)
+class PostDetailView(DetailView):
+    model = Post
+    template_name = 'posts/post_detail.html'
+    context_object_name = 'target_post'
+    pk_url_kwarg = 'post_id'
 
-    if target_post.author != request.user:
-        return redirect('posts:post_detail', post_id)
-
-    form = PostForm(
-        request.POST or None,
-        files=request.FILES or None,
-        instance=target_post
-    )
-    if not form.is_valid():
-        is_edit: bool = True
-        context = {
-            'form': form,
-            'post_id': post_id,
-            'is_edit': is_edit
-        }
-        return render(request, template, context)
-    form.save()
-    return redirect('posts:post_detail', post_id)
+    def get_context_data(self, *, object_list=None, **kwargs):
+        context = super().get_context_data(**kwargs)
+        target_post = context.get('target_post')
+        comments = target_post.comments.all()
+        context['form'] = CommentForm()
+        context['comments'] = comments
+        return context
 
 
-@login_required
-def add_comment(request, post_id):
-    """Добавление комментариев к постам"""
-    post = get_object_or_404(Post, pk=post_id)
-    form = CommentForm(request.POST or None)
+@method_decorator(login_required, name="dispatch")
+class PostCreateView(CreateView):
+    template_name = 'posts/create_post.html'
+    form_class = PostForm
 
-    if form.is_valid():
+    def form_valid(self, form):
+        post = form.save(commit=False)
+        post.author = self.request.user
+        post.save()
+        return redirect('posts_page:profile', form.instance.author.username)
+
+
+@method_decorator(login_required, name="dispatch")
+class PostEditView(UpdateView):
+    model = Post
+    template_name = 'posts/create_post.html'
+    form_class = PostForm
+    pk_url_kwarg = 'post_id'
+
+    def get(self, request, *args, **kwargs):
+        self.post_id = self.kwargs.get('post_id')
+
+        if request.user.posts.filter(id=self.post_id).exists():
+            return super().get(request, *args, **kwargs)
+
+        return redirect('posts:post_detail', self.post_id)
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['post_id'] = self.post_id
+        context['is_edit'] = True
+        return context
+
+    def get_success_url(self):
+        post_id = self.kwargs.get('post_id')
+        return reverse('posts:post_detail', kwargs={'post_id': post_id})
+
+
+@method_decorator(login_required, name="dispatch")
+class AddCommentView(CreateView):
+    model = Comment
+    template_name = 'posts/post_detail.html'
+    form_class = CommentForm
+
+    def form_valid(self, form):
+        form.instance.post_id = self.kwargs['post_id']
         comment = form.save(commit=False)
-        comment.author = request.user
-        comment.post = post
-        form.save()
-    return redirect('posts:post_detail', post_id=post_id)
+        comment.author = self.request.user
+        comment.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        post_id = self.kwargs.get('post_id')
+        return reverse('posts:post_detail', kwargs={'post_id': post_id})
 
 
-@login_required
-def follow_index(request):
-    """Лента подписки на авторов"""
-    follow_list = Post.objects.filter(author__following__user=request.user)
-    page_obj = paginator_page(
-        follow_list, request.GET.get('page'), SHOWING_POSTS
-    )
-    context = {
-        'page_obj': page_obj,
-    }
+@method_decorator(login_required, name="dispatch")
+class FollowListView(ListView):
+    """Лента подписки"""
+    model = Follow
+    template_name = 'posts/follow.html'
+    context_object_name = 'page_obj'
 
-    template = 'posts/follow.html'
-    return render(request, template, context)
+    def get(self, request, *args, **kwargs):
+        self.page = self.request.GET.get('page')
+        self.follow_list = Post.objects.filter(
+            author__following__user=self.request.user
+        )
+        return super().get(request, *args, **kwargs)
+
+    def get_queryset(self):
+        paginator = Paginator(self.follow_list, settings.SHOWING_POSTS)
+        return paginator.get_page(self.page)
 
 
-@login_required
-def profile_follow(request, username):
+@method_decorator(login_required, name="dispatch")
+class ProfileFollowView(View):
     """Подписка на автора"""
-    author = get_object_or_404(User, username=username)
+    model = Follow
+    template_name = 'posts/profile.html'
 
-    if request.user.id != author.id:
-        Follow.objects.get_or_create(user=request.user, author=author)
+    def get(self, request, username):
+        author = get_object_or_404(User, username=username)
+        if request.user.id != author.id:
+            Follow.objects.get_or_create(user=request.user, author=author)
+        return redirect('posts_page:profile', author)
 
-    return redirect('posts_page:profile', author)
 
-
-@login_required
-def profile_unfollow(request, username):
+@method_decorator(login_required, name="dispatch")
+class ProfileUnfollowView(View):
     """Отписка от автора"""
-    author = get_object_or_404(User, username=username)
+    model = Follow
+    template_name = 'posts/profile.html'
 
-    if request.user.id != author.id:
-        Follow.objects.filter(user=request.user, author=author).delete()
+    def get(self, request, username):
+        author = get_object_or_404(User, username=username)
+        if request.user.id != author.id:
+            Follow.objects.filter(user=request.user, author=author).delete()
 
-    return redirect('posts_page:profile', username)
-
-
-def paginator_page(queryset: QuerySet, page: int, showing_posts: int) -> Page:
-    paginator = Paginator(queryset, showing_posts)
-    return paginator.get_page(page)
+        return redirect('posts_page:profile', username)
