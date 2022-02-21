@@ -1,6 +1,5 @@
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import UniqueConstraint
 from django.utils.text import slugify
 
 from core.models import CreatedModel
@@ -106,6 +105,8 @@ class Follow(models.Model):
     )
 
     class Meta:
-        UniqueConstraint(
-            fields=['user', 'author'], name='follower_author_connection'
-        )
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'], name='follower_author_connection'
+            )
+        ]

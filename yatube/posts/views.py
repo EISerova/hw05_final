@@ -1,12 +1,11 @@
-from xml.etree.ElementTree import Comment
-
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
-from django.views.generic import (CreateView, DetailView, ListView, UpdateView,
+from django.views.generic import (CreateView, DetailView,
+                                  ListView, UpdateView,
                                   View)
 
 from .forms import CommentForm, PostForm

@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
 from django.test import Client, TestCase
+from django.core.cache import cache
 
 
 class AboutURLTest(TestCase):
@@ -15,6 +16,7 @@ class AboutURLTest(TestCase):
 
     def setUp(self) -> None:
         self.guest_client = Client()
+        cache.clear()
 
     def test_about_pages_exist(self):
         """Страницы about доступны пользователям"""

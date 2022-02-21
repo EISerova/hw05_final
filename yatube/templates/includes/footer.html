@@ -1,5 +1,8 @@
-<footer class="border-top text-center py-3">
-  <!-- тег span используется для добавления нужных стилей отдельным участкам текста --> 
-  <p>© {{ year }} Copyright <span style="color:red">Ya</span>tube</p>    
-</footer>
+{% load cache %}
+{% cache 86400 footer %}
+  <footer class="border-top text-center py-3">
+    <!-- тег span используется для добавления нужных стилей отдельным участкам текста --> 
+    <p>© {{ year }} Copyright <span style="color:red">Ya</span>tube</p>    
+  </footer>
+{% endcache %}
 
