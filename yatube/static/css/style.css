@@ -1,0 +1,46 @@
+  .post-style {
+    max-width: 1170px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 16px; 
+    padding-right: 16px;
+  }
+
+  .header-style {
+    background-color: rgb(215, 224, 230); 
+    font-size: 20px; 
+    font-family: Trebuchet MS;
+  }
+
+  .card-style {
+    max-width: 1170px; 
+    margin: 0 auto; 
+    text-align: justify;
+  }
+
+  .description-group {
+    color: #9fabbb;
+    font-weight: bold;
+    max-width: 1170px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 16px; 
+    padding-right: 16px;
+  }
+
+  .logo {
+    color:red; 
+    font-size:35px;
+  }
+
+  .my-btn {
+    color: #000000;
+    background-color: #d7dfe6;
+    border-color: #d7dde6 #d7dde6 #a8b6c9;
+    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+    width: 18rem ;
+  }
+
+  .aligncenter {
+    text-align: center;
+  }
