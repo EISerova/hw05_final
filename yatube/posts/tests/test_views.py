@@ -1,6 +1,7 @@
 import shutil
 import tempfile
 from http import HTTPStatus
+from xml.etree.ElementTree import Comment
 
 from django import forms
 from django.conf import settings
@@ -11,7 +12,7 @@ from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 
 from ..forms import PostForm
-from ..models import Follow, Group, Post
+from ..models import Follow, Group, Post, Comment
 
 User = get_user_model()
 
@@ -46,6 +47,10 @@ class ViewsURLTest(TestCase):
             author=cls.user,
             group=cls.group,
             image=cls.uploaded
+        )
+        cls.comment = Comment.objects.create(
+            author=cls.user,
+            post=cls.post
         )
         cls.url_index: dict = {
             'name': 'posts_page:index',
@@ -153,10 +158,12 @@ class ViewsURLTest(TestCase):
 
         test_post: str = response.context.get('target_post')
         test_image = test_post.image
+        comments = test_post.comments.all()
 
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertEqual(test_post, self.post)
         self.assertEqual(test_image, self.post.image)
+        self.assertEqual(comments[0], self.comment)
 
     def test_post_create_and_edit_page_get_correct_form(self):
         """Шаблоны post_create и post_edit

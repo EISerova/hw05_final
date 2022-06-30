@@ -40,20 +40,16 @@ class PostFormEditTest(TestCase):
         self.guest_client = Client()
         self.author_client = Client()
         self.author_client.force_login(self.user_author)
-        self.not_author_client = Client()
-        self.not_author_client.force_login(self.user_author)
 
     def test_valid_form_only_author_edit_post(self):
         """Только автор может изменять пост"""
-        base_text: str = self.post.text
-        base_group: str = self.post.group
-        base_pk: int = self.post.pk
         new_text: str = 'Не автор редактирует пост'
+        count_posts: int = Post.objects.count()
         form_data = {
             'text': new_text,
             'group': self.other_group.pk
         }
-
+        self.not_author_client = Client()
         self.not_author_client.force_login(self.user_not_author)
         response = self.not_author_client.post(
             reverse(
@@ -65,14 +61,18 @@ class PostFormEditTest(TestCase):
             follow=True
         )
 
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertEqual(self.post.pk, base_pk)
-        self.assertEqual(self.post.group, base_group)
-        self.assertEqual(self.post.text, base_text)
+        edit_post = Post.objects.get(pk=self.post.pk)
+
+        self.assertEqual(count_posts, Post.objects.count())
+        self.assertEqual(self.post.text, edit_post.text)
+        self.assertEqual(self.post.group, edit_post.group)
         self.assertEqual(
             self.post.author,
-            self.user_author,
+            edit_post.author,
             msg='Пост отредактировал не автор'
+        )
+        self.assertRedirects(
+            response, f'/profile/{self.user_author.username}/'
         )
 
     def test_valid_form_edit_post_and_group(self):

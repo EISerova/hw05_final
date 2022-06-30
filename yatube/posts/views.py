@@ -57,7 +57,8 @@ class ProfileListView(ListView):
         self.author = get_object_or_404(User, username=username)
         self.profile_list = self.author.posts.select_related('group')
         self.following = (
-            request.user.is_authenticated
+            request.user.id != self.author.id
+            and request.user.is_authenticated
             and self.author.following.filter(user=request.user).exists()
         )
         return super().get(request, *args, **kwargs)
@@ -116,8 +117,12 @@ class PostEditView(UpdateView):
         return redirect('posts:post_detail', self.post_id)
 
     def form_valid(self, form):
-        form.instance.author = self.request.user
-        return super().form_valid(form)
+        if form.instance.author == self.request.user:
+            return super().form_valid(form)
+        else:
+            return redirect(
+                'posts_page:profile', form.instance.author.username
+            )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -187,8 +192,8 @@ class ProfileUnfollowView(View):
     template_name = 'posts/profile.html'
 
     def get(self, request, username):
-        author = get_object_or_404(User, username=username)
-        if request.user.id != author.id:
-            Follow.objects.filter(user=request.user, author=author).delete()
+        get_object_or_404(
+            Follow, user=request.user, author__username=username
+        ).delete()
 
         return redirect('posts_page:profile', username)
