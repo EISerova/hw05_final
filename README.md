@@ -35,13 +35,13 @@ Pytest 6.2
 Клонировать репозиторий
 
 ```bash
-  git clone https://github.com/EISerova/hw05_final
+  git clone https://github.com/EISerova/yatube-social-network
 ```
 
 Перейти в папку проекта
 
 ```bash
-  cd hw05_final
+  cd yatube-social-network
 ```
 
 Создать и активировать виртуальное окружение
