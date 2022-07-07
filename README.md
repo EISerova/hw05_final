@@ -12,7 +12,7 @@ Pytest 6.2
 
 ## Стэк технологий:
 **Frontend:** HTML, CSS<br>
-**Backend:** Python, Django, Pytest
+**Backend:** Python, Django, Pytest, Unittest
 
 ## Скриншоты:
 Главная страница
