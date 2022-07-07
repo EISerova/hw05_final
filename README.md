@@ -11,7 +11,7 @@ Django 2.2<br>
 Pytest 6.2
 
 ## Стэк технологий:
-**Frontend:** HTML, CSS
+**Frontend:** HTML, CSS<br>
 **Backend:** Python, Django, Pytest
 
 ## Скриншоты:
@@ -24,7 +24,8 @@ Pytest 6.2
 Страница поста
 ![Post detail screenshot](https://i120.fastpic.org/big/2022/0707/c8/3bedf7b2d483b2bd4252cdf20466bbc8.jpg)
 
-## Автор: Серова Екатерина
+## Автор: 
+Серова Екатерина
 
 ## Обратная связь:
 Если у вас есть предложения или замечания, пожалуйста, свяжитесь со мной - katyaserova@yandex.ru
