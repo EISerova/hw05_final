@@ -9,17 +9,10 @@ User = get_user_model()
 
 class Group(models.Model):
     """Модель групп."""
-    title = models.CharField(
-        max_length=200,
-        verbose_name="Название группы"
-    )
-    slug = models.SlugField(
-        unique=True,
-        verbose_name="Атрибут группы"
-    )
-    description = models.TextField(
-        verbose_name="Описание группы"
-    )
+
+    title = models.CharField(max_length=200, verbose_name="Название группы")
+    slug = models.SlugField(unique=True, verbose_name="Атрибут группы")
+    description = models.TextField(verbose_name="Описание группы")
 
     class Meta:
         verbose_name: str = "группа"
@@ -36,11 +29,9 @@ class Group(models.Model):
 
 class Post(CreatedModel):
     """Модель сообщений."""
+
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="posts",
-        verbose_name="Автор"
+        User, on_delete=models.CASCADE, related_name="posts", verbose_name="Автор"
     )
     group = models.ForeignKey(
         Group,
@@ -48,16 +39,12 @@ class Post(CreatedModel):
         blank=True,
         null=True,
         related_name="posts",
-        verbose_name="Группа, к которой будет относиться пост"
+        verbose_name="Группа, к которой будет относиться пост",
     )
-    image = models.ImageField(
-        'Картинка',
-        upload_to='posts/',
-        blank=True
-    )
+    image = models.ImageField("Картинка", upload_to="posts/", blank=True)
 
     class Meta:
-        ordering = ('-pub_date', 'author')
+        ordering = ("-pub_date", "author")
         verbose_name: str = "опубликованный пост"
         verbose_name_plural: str = "Опубликованные посты"
 
@@ -67,21 +54,22 @@ class Post(CreatedModel):
 
 class Comment(CreatedModel):
     """Модель сообщений."""
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="comments",
-        verbose_name="Автор комментария"
+        verbose_name="Автор комментария",
     )
     post = models.ForeignKey(
         Post,
         on_delete=models.CASCADE,
         related_name="comments",
-        verbose_name="Комментируемый пост"
+        verbose_name="Комментируемый пост",
     )
 
     class Meta:
-        ordering = ('-pub_date',)
+        ordering = ("-pub_date",)
         verbose_name: str = "опубликованный комментарий"
         verbose_name_plural: str = "Опубликованные комментарии"
 
@@ -91,22 +79,20 @@ class Comment(CreatedModel):
 
 class Follow(models.Model):
     """Модель подписки на авторов"""
+
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name="follower",
-        verbose_name="Подписчик"
+        verbose_name="Подписчик",
     )
     author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name="following",
-        verbose_name="Автор"
+        User, on_delete=models.CASCADE, related_name="following", verbose_name="Автор"
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'author'], name='follower_author_connection'
+                fields=["user", "author"], name="follower_author_connection"
             )
         ]
