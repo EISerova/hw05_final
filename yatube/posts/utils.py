@@ -1,5 +1,5 @@
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.conf import settings
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 
 
 class PaginatorMixin(object):

@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-from django.test import Client, TestCase
 from django.core.cache import cache
+from django.test import Client, TestCase
 
 
 class AboutURLTest(TestCase):
